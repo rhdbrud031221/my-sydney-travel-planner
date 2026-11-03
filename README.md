@@ -1,52 +1,33 @@
-# My Sydney — Travel Workspace
+# My Sydney — Travel Dashboard
 
-시드니 가족 여행 일정 관리 앱. **개인 로컬 공간**과 **공개 포트폴리오 데모 공간**을 분리한 정적 웹 MVP입니다.
+A responsive family travel planner for Sydney, Australia, built with HTML, CSS, JavaScript and Leaflet.
 
-## 기능 (v1.3)
-- 공간 선택: 개인 로컬 저장 / 샘플 데이터 데모 (서로 다른 localStorage 키)
-- 항공편: 항공사·편명·출도착 시간·공항·탑승자 및 좌석 기록
-- 호텔: 체크인·체크아웃·시설·주소 및 메모
-- 일정표, 지출 내역, 준비물 체크리스트
-- 장소: 관광 / 쇼핑 / 카페 / 음식점 / 기타 분류, 예상 지출(AUD) 관리
-- **지도**: Leaflet + OpenStreetMap, 호텔·공항(SYD / 항공편 내 ICN)·좌표가 있는 저장 장소 핀, 클릭 상세 정보
-- 장소 검색: OpenStreetMap Nominatim을 이용한 사용자가 직접 실행하는 검색, 지도 클릭으로 위치 지정
-- JSON 데이터 백업, 데모 데이터 초기화
+## Features
+- **Trip Overview:** live summary cards, first-day itinerary, packing progress, saved-place estimated spend and actual expenses.
+- **Flights:** departure/arrival, airline, flight number, passengers, seats.
+- **Hotels:** check-in/out, amenities and notes.
+- **Itinerary:** dated activities and notes.
+- **Places & interactive map:** searchable Sydney map with pins for hotels, airports and saved places, plus estimated spend per saved place.
+- **Expenses:** track actual spending separately from planned budgets.
+- **Packing:** essential and personal checklists.
+- **Demo workspace:** fictional sample data stored separately from the personal workspace.
 
-## 지도 실행 주의 (v1.4.1)
-- OpenStreetMap 공식 타일 서버의 정책에 맞게 정확한 타일 URL을 사용합니다. `file://`로 실행하면 지도가 차단될 수 있습니다.
-- **VS Code Live Server**로 `index.html`을 실행하세요. 주소가 `http://127.0.0.1:5500/...`처럼 시작하는지 확인하세요.
-- 로컬 파일과 Live Server는 **저장 공간이 다릅니다**. 기존 개인 데이터를 옮기려면 원래 파일에서 JSON 백업한 후 별도 가져오기 기능을 구현해야 합니다.
-- 제공 서버에 의해 계속 차단된다면 우회하지 않고 정식 제공사 타일 API를 연결해야 합니다.
+## Run locally
+Open the folder in VS Code and select **Go Live** using Live Server. Map tiles and geocoding require network access. You can edit and browse without installing a JavaScript build tool.
 
-## 실행
-1. `index.html`을 브라우저에서 열면 됩니다. `styles.css`와 `app.js`는 같은 폴더에 있어야 합니다.
-2. 지도 타일, Leaflet 라이브러리, 주소 검색에는 **인터넷 연결**이 필요합니다. 파일 실행 시 검색이 제한되는 브라우저라면 VS Code Live Server 또는 GitHub Pages에서 실행해 주세요.
-3. 장소의 좌표를 입력하거나 지도 검색 / 지도를 클릭해 장소를 추가하면 핀이 생깁니다. 기존 등록 장소 중 알려진 시드니 명소는 자동으로 좌표가 채워집니다.
+## Data and privacy
+The personal workspace is currently stored in the browser's `localStorage` (`my-sydney-v1`). The demo workspace uses a separate key (`my-sydney-demo-v1`). These browser-only modes **do not** provide authentication, family-wide sync or security against other people using the same browser profile. Do not enter sensitive booking references or personal data on a shared computer. Family authentication and cloud persistence are planned, **not implemented yet**.
 
-## 중요: 현재 공유 기능의 한계
-- **가족 계정 로그인, 클라우드 DB, 실시간 공동 편집은 아직 구현되지 않았습니다.** 개인 모드는 기존 키 `my-sydney-v1`을 유지해 저장된 데이터와 호환됩니다.
-- 공개 데모는 별도 키 `my-sydney-demo-v1`에서 샘플 데이터를 사용하며, 본인의 개인 데이터에 접근하지 않습니다.
-- 실제 탑승자 정보, 예약번호, 비밀키를 GitHub 코드에 하드코딩하지 마세요. 브라우저 로컬 저장은 해당 컴퓨터 사용자에게 노출될 수 있으니 민감 정보 관리에 주의하세요.
-- 지도 기반 좌표는 수동 지정/검색된 값이며 항공 이동 시간이나 지출액을 자동 계산하지 않습니다.
+A backup action exports the active workspace's JSON. Opening this project under a different origin (e.g., `file://` vs Live Server) uses a different `localStorage` area.
 
-## 기술
-HTML · CSS · Vanilla JavaScript · localStorage · Leaflet 1.9.4 · OpenStreetMap tiles · Nominatim (사용자 검색 요청에 한함)
+## Stack
+HTML5 · CSS3 · Vanilla JavaScript · Leaflet 1.9.4 · OpenStreetMap tiles
 
-## 다음 목표
-Supabase Auth + PostgreSQL + RLS 기반 가족용 로그인 / 여행 공동 수정 구현. 그때도 공개 데모는 별도 샘플 데이터로 유지합니다.
+## Development
+- v1.4.2 — Leaflet tile layout fixes
+- v1.5 — Premium responsive dashboard; data-driven overview and left-side navigation; removed developer-only copy from the app UI.
 
-Map data © OpenStreetMap contributors. Leaflet © Vladimir Agafonkin, © CloudMade.
-
-
-## v1.4 — 준비물 카테고리
-- 준비물을 **필수준비물 / 개인준비물**로 분리하여 표시
-- 카테고리별 준비 완료 개수와 진행률 제공
-- 준비물 추가·수정 시 분류 선택 가능 (수정으로 다른 분류로 이동 가능)
-- 기존 브라우저 데이터의 체크 상태와 항목을 유지하며, 이전 데이터의 분류가 없는 경우 자동 분류
-
-
-## v1.4.2 지도 레이아웃 수정
-- Leaflet 지도 CSS를 jsDelivr CDN에서 먼저 로드하도록 변경했습니다.
-- 지도 타일이 다른 영역까지 튀어나오지 않도록 기본 레이아웃 스타일을 보강했습니다.
-- 개발 중에는 Live Server에서 실행하고 브라우저에서 `Ctrl+Shift+R`로 강력 새로고침하세요.
-- 지도 CSS가 네트워크에서 차단되면 추가 스타일이 정상 인터페이스의 모든 부분을 복구하지는 못할 수 있습니다.
+## Notes
+- The main dashboard's map teaser is decorative. Use **저장 장소** to view the actual interactive map.
+- The dashboard reflects saved data, not hard-coded preview values.
+- All changes are tracked through GitHub Desktop; Supabase integration is a future milestone.
