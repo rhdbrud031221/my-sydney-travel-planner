@@ -87,7 +87,7 @@ function renderPacking(){
     $(countId).textContent=completed+' / '+rows.length;
     $(progressId).style.width=(rows.length?Math.round(completed/rows.length*100):0)+'%';
     const list=$(listId);list.replaceChildren();
-    if(!rows.length)list.append(empty(category==='호주에서 할 일'?'아직 등록한 활동이 없어요. 추천 항목을 추가하거나 직접 적어 보세요.':'아직 준비물이 없어요. 상단에서 추가해 보세요.'));
+    if(!rows.length)list.append(empty(category==='호주에서 할 일'?'아직 등록한 활동이 없어요. 직접 추가해 보세요.':'아직 준비물이 없어요. 상단에서 추가해 보세요.'));
     rows.forEach(x=>{
       const row=el('article','item');
       const body=el('label','checkrow');const input=el('input');input.type='checkbox';input.checked=!!x.done;
@@ -153,31 +153,4 @@ $('#editForm').addEventListener('submit',async e=>{e.preventDefault();const valu
   }
   if(old)Object.assign(old,values);else state[editKind].push({id:nextId,...values,...(editKind==='packing'?{done:false}:{})});
   save();$('#editor').close();render();notify('저장했어요!')});$('#closeDialog').onclick=$('#cancelDialog').onclick=()=>$('#editor').close();$('#editor').addEventListener('click',e=>{if(e.target===$('#editor'))$('#editor').close()});document.querySelectorAll('[data-add]').forEach(b=>b.addEventListener('click',()=>openEditor(b.dataset.add)));document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>selectTab(b.dataset.tab)));document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>selectTab(b.dataset.go)));$('#placeCategory').addEventListener('change',()=>{renderPlaces();renderMapMarkers()});
-// User-provided packing & experience checklist: add missing items only.
-const requestedItems={
-  '필수준비물':['썬크림','선글라스','모자','슬리퍼','기초제품','속옷','양말','상의','하의','겉옷','체크카드(트래블카드)','잠옷','운동화','치약칫솔'],
-  '개인준비물':['상비약','목베게','볼펜','화장품','헤어제품','이어폰(에어팟)','비치타월','방수팩'],
-  '호주에서 할 일':['가족 단체티 맞추기','오전에 러닝하기','피크닉','어그 제품 구경(구매)','추억영상찍기']
-};
-function canonicalChecklistName(name){return String(name||'').trim().toLowerCase().replace(/\s+/g,'').replace(/선크림/g,'썬크림').replace(/목베개/g,'목베게')}
-$('#addRequestedItemsBtn').addEventListener('click',()=>{
-  if(!state||!Array.isArray(state.packing))return;
-  const queued=[];
-  for(const [category,names] of Object.entries(requestedItems)){
-    const existing=new Set(state.packing.filter(item=>item.category===category).map(item=>canonicalChecklistName(item.name)));
-    for(const name of names){const normalized=canonicalChecklistName(name);if(existing.has(normalized))continue;queued.push({id:uid(),name,category,done:false});existing.add(normalized)}
-  }
-  if(!queued.length){notify('27개 항목이 이미 등록되어 있어요.');return;}
-  if(!confirm('기존 체크 상태는 유지하고 없는 항목 '+queued.length+'개만 추가할까요? 가족 공유 공간에서는 가족 모두에게 반영됩니다.'))return;
-  state.packing.push(...queued);
-  save();render();notify('새 항목 '+queued.length+'개를 추가했어요!');
-});
-const australiaIdeas=['시드니 오페라하우스 앞에서 가족사진 찍기','시드니 하버에서 페리 타기','본다이 비치에서 해변 산책하기','호주 카페에서 플랫화이트 마셔보기','현지 마켓 구경하기','시드니 야경 감상하기'];
-$('#addExperienceIdeas').addEventListener('click',()=>{
-  const existing=new Set(state.packing.filter(x=>x.category==='호주에서 할 일').map(x=>String(x.name||'').trim().toLowerCase()));
-  const suggestions=australiaIdeas.filter(name=>!existing.has(name.toLowerCase()));
-  if(!suggestions.length){notify('추천 항목이 이미 모두 등록되어 있어요.');return;}
-  if(!confirm('호주에서 할 일 추천 '+suggestions.length+'개를 체크리스트에 추가할까요? 가족 공유 공간이라면 모두에게 표시됩니다.'))return;
-  suggestions.forEach(name=>state.packing.push({id:uid(),name,category:'호주에서 할 일',done:false}));
-  save();render();notify('호주에서 할 일 '+suggestions.length+'개를 추가했어요!');
-});setupMapEvents();$('#exportBtn').addEventListener('click',()=>{const blob=new Blob([JSON.stringify({app:'My Sydney',version:2,exportedAt:new Date().toISOString(),data:state},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='my-sydney-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);notify('백업 파일을 저장했어요.')});window.MySydneyCore={enterCloud:(data)=>enterWorkspace('cloud',data),setCloudState:(data)=>{if(mode!=='cloud')return;state=data;render()},getCloudState:()=>structuredClone(state),getLegacyState:()=>{const raw=localStorage.getItem(PRIVATE_KEY);return raw?JSON.parse(raw):null}};/* First render occurs after selecting a mode. */})();
+setupMapEvents();$('#exportBtn').addEventListener('click',()=>{const blob=new Blob([JSON.stringify({app:'My Sydney',version:2,exportedAt:new Date().toISOString(),data:state},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='my-sydney-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);notify('백업 파일을 저장했어요.')});window.MySydneyCore={enterCloud:(data)=>enterWorkspace('cloud',data),setCloudState:(data)=>{if(mode!=='cloud')return;state=data;render()},getCloudState:()=>structuredClone(state),getLegacyState:()=>{const raw=localStorage.getItem(PRIVATE_KEY);return raw?JSON.parse(raw):null}};/* First render occurs after selecting a mode. */})();
