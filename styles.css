@@ -76,3 +76,12 @@ body{background:#f6f7f5}
 .login-form button:disabled{opacity:.55;cursor:wait}
 #modeBadge{max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media(max-width:900px){.mode-cards{grid-template-columns:1fr}}
+
+/* v2.1: place photo cards and private image previews */
+.place-photo{width:108px;height:92px;object-fit:cover;border-radius:12px;flex-shrink:0;background:#e6eef2}
+.place-popup-photo{width:100%;max-height:160px;object-fit:cover;border-radius:9px;margin-top:9px;display:block}
+.place-photo[hidden],.place-popup-photo[hidden]{display:none!important}
+.photo-hint{color:#697b8a;font-size:12px;line-height:1.5}
+.photo-remove-label{display:flex;align-items:center;gap:8px;font-size:13px;margin-top:5px}
+.photo-remove-label input{width:auto;min-height:0}
+@media(max-width:600px){.place-photo{width:75px;height:80px}.item:has(.place-photo:not([hidden])){flex-wrap:wrap}.item .itemmain{min-width:130px}}

@@ -10,7 +10,7 @@ const clean=data=>Object.fromEntries(cats.map(k=>[k,Array.isArray(data?.[k])?dat
 const status=(s)=>{const e=$('#modeBadge');if(e)e.textContent=s;};
 const alertError=(p,e)=>alert(p+'\n'+(e?.message||e||'알 수 없는 오류'));
 function isOwner(){return role==='owner';}
-async function logout(){clearInterval(poll);clearTimeout(saveTimer);if(dirty){await flush();}if(db)await db.auth.signOut();tripId=null;role=null;remoteVersion=null;dirty=false;}
+async function logout(){signedPhotoCache.clear();clearInterval(poll);clearTimeout(saveTimer);if(dirty){await flush();}if(db)await db.auth.signOut();tripId=null;role=null;remoteVersion=null;dirty=false;}
 async function login(email,password,expectedRole,button){
   if(!db){alert('Supabase 라이브러리를 불러오지 못했어요. 인터넷 연결을 확인하세요.');return;}
   const original=button.textContent;button.disabled=true;button.textContent='로그인 중…';
@@ -64,7 +64,28 @@ async function refresh(force=false){
   }catch(e){if(force)alertError('새로고침 실패:',e);}
 }
 function startPolling(){clearInterval(poll);poll=setInterval(()=>refresh(false),15000);}
-window.MySydneyCloud={queueSave,logout,isOwner};
+// Photos live in a private bucket. Only workspace members can read/upload them.
+const PHOTO_BUCKET='place-photos';
+const signedPhotoCache=new Map();
+async function uploadPlaceImage(file,placeId){
+  if(!db||!tripId)throw Error('로그인이 필요합니다.');
+  if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>3*1024*1024)throw Error('3MB 이하 JPG/PNG/WebP를 선택해 주세요.');
+  const ext={'image/jpeg':'jpg','image/png':'png','image/webp':'webp'}[file.type];
+  const path=tripId+'/'+placeId+'/'+crypto.randomUUID()+'.'+ext;
+  const {error}=await db.storage.from(PHOTO_BUCKET).upload(path,file,{contentType:file.type,upsert:false,cacheControl:'3600'});
+  if(error)throw error;
+  return path;
+}
+async function getPlaceImageUrl(path){
+  if(!db||!tripId||typeof path!=='string'||!path.startsWith(tripId+'/'))return null;
+  const cached=signedPhotoCache.get(path);
+  if(cached&&cached.until>Date.now())return cached.url;
+  const {data,error}=await db.storage.from(PHOTO_BUCKET).createSignedUrl(path,3600);
+  if(error)throw error;
+  signedPhotoCache.set(path,{url:data.signedUrl,until:Date.now()+50*60*1000});
+  return data.signedUrl;
+}
+window.MySydneyCloud={queueSave,logout,isOwner,uploadPlaceImage,getPlaceImageUrl};
 $('#ownerLoginForm').addEventListener('submit',e=>{e.preventDefault();const form=e.currentTarget;login(form.elements.email.value.trim(),form.elements.password.value,'owner',form.querySelector('button'));});
 $('#familyLoginForm').addEventListener('submit',e=>{e.preventDefault();const form=e.currentTarget;const family=cfg?.familyEmail?.trim();if(!family||family.includes('REPLACE_WITH_')){alert('먼저 config.js의 familyEmail을 Supabase에 등록한 가족 공용 이메일로 설정해 주세요.');return;}login(family,form.elements.password.value,'member',form.querySelector('button'));});
 $('#refreshCloudBtn').addEventListener('click',()=>refresh(true));
